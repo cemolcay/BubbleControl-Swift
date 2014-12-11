@@ -1,0 +1,476 @@
+//
+//  BubbleControl.swift
+//  BubbleControl-Swift
+//
+//  Created by Cem Olcay on 11/12/14.
+//  Copyright (c) 2014 Cem Olcay. All rights reserved.
+//
+
+import UIKit
+
+private let BubbleControlMoveAnimationDuration: NSTimeInterval = 0.5
+private let BubbleControlSpringDamping: CGFloat = 0.3
+private let BubbleControlSpringVelocity: CGFloat = 0.3
+
+extension UIView {
+    
+    // MARK: Frame Extensions
+    
+    var x: CGFloat {
+        return self.frame.origin.x
+    }
+    
+    var y: CGFloat {
+        return self.frame.origin.y
+    }
+    
+    var w: CGFloat {
+        return self.frame.size.width
+    }
+    
+    var h: CGFloat {
+        return self.frame.size.height
+    }
+    
+    
+    var left: CGFloat {
+        return self.x
+    }
+    
+    var right: CGFloat {
+        return self.x + self.w
+    }
+    
+    var top: CGFloat {
+        return self.y
+    }
+    
+    var bottom: CGFloat {
+        return self.y + self.h
+    }
+    
+    
+    func setX (x: CGFloat) {
+        self.frame = CGRect (x: x, y: self.y, width: self.w, height: self.h)
+    }
+    
+    func setY (y: CGFloat) {
+        self.frame = CGRect (x: self.x, y: y, width: self.w, height: self.h)
+    }
+    
+    func setW (w: CGFloat) {
+        self.frame = CGRect (x: self.x, y: self.y, width: w, height: self.h)
+    }
+    
+    func setH (h: CGFloat) {
+        self.frame = CGRect (x: self.x, y: self.y, width: self.w, height: h)
+    }
+    
+    
+    func setSize (size: CGSize) {
+        self.frame = CGRect (x: self.x, y: self.y, width: size.width, height: size.height)
+    }
+    
+    func setPosition (position: CGPoint) {
+        self.frame = CGRect (x: position.x, y: position.y, width: self.w, height: self.h)
+    }
+    
+    
+    func leftWithOffset (offset: CGFloat) -> CGFloat {
+        return self.left - offset
+    }
+    
+    func rightWithOffset (offset: CGFloat) -> CGFloat {
+        return self.right + offset
+    }
+    
+    func topWithOffset (offset: CGFloat) -> CGFloat {
+        return self.top - offset
+    }
+    
+    func botttomWithOffset (offset: CGFloat) -> CGFloat {
+        return self.bottom + offset
+    }
+    
+    
+    
+    func moveY (y: CGFloat) {
+        var moveRect = self.frame
+        moveRect.origin.y = y
+        
+        UIView.animateWithDuration(BubbleControlMoveAnimationDuration,
+            delay: 0,
+            usingSpringWithDamping: BubbleControlSpringDamping,
+            initialSpringVelocity: BubbleControlSpringVelocity,
+            options: UIViewAnimationOptions.CurveEaseInOut,
+            animations: {
+                self.frame = moveRect
+            },
+            completion: nil)
+    }
+    
+    func moveX (x: CGFloat) {
+        var moveRect = self.frame
+        moveRect.origin.x = x
+        
+        UIView.animateWithDuration(BubbleControlMoveAnimationDuration,
+            delay: 0,
+            usingSpringWithDamping: BubbleControlSpringDamping,
+            initialSpringVelocity: BubbleControlSpringVelocity,
+            options: UIViewAnimationOptions.CurveEaseInOut,
+            animations: {
+                self.frame = moveRect
+            },
+            completion: nil)
+    }
+    
+    func movePoint (x: CGFloat, y: CGFloat) {
+        var moveRect = self.frame
+        moveRect.origin.x = x
+        moveRect.origin.y = y
+        
+        UIView.animateWithDuration(BubbleControlMoveAnimationDuration,
+            delay: 0,
+            usingSpringWithDamping: BubbleControlSpringDamping,
+            initialSpringVelocity: BubbleControlSpringVelocity,
+            options: UIViewAnimationOptions.CurveEaseInOut,
+            animations: {
+                self.frame = moveRect
+            },
+            completion: nil)
+    }
+    
+    func movePoint (point: CGPoint) {
+        var moveRect = self.frame
+        moveRect.origin = point
+        
+        UIView.animateWithDuration(BubbleControlMoveAnimationDuration,
+            delay: 0,
+            usingSpringWithDamping: BubbleControlSpringDamping,
+            initialSpringVelocity: BubbleControlSpringVelocity,
+            options: UIViewAnimationOptions.CurveEaseInOut,
+            animations: {
+                self.frame = moveRect
+            },
+            completion: nil)
+    }
+    
+    
+    func setScale (s: CGFloat) {
+        var transform = CATransform3DIdentity
+        transform.m34 = 1.0 / -1000.0
+        transform = CATransform3DScale(transform, s, s, s)
+        
+        self.layer.transform = transform
+    }
+    
+    
+    func bubble () {
+        
+        self.setScale(1.2)
+        UIView.animateWithDuration(BubbleControlMoveAnimationDuration,
+            delay: 0,
+            usingSpringWithDamping: BubbleControlSpringDamping,
+            initialSpringVelocity: BubbleControlSpringVelocity,
+            options: UIViewAnimationOptions.CurveEaseInOut,
+            animations: {
+                self.setScale(1)
+            },
+            completion: nil)
+    }
+}
+
+
+
+class BubbleControl: UIControl {
+    
+
+    // MARK: Constants
+    
+    let popTriggerDuration: NSTimeInterval = 0.5
+    let popAnimationDuration: NSTimeInterval = 1
+    let popAnimationShakeDuration: NSTimeInterval = 0.15
+    let popAnimationShakeRotations: (CGFloat, CGFloat) = (-30, 30)
+    let popAnimationScale: CGFloat = 1.2
+    
+    
+    
+    // MARK: Properties
+    
+    private var imageView: UIImageView?
+    
+    var image: UIImage? {
+        didSet {
+            imageView?.image = image
+        }
+    }
+    
+    var toggle: Bool = false {
+        didSet {
+            if toggle {
+                openView()
+            } else {
+                closeView()
+            }
+        }
+    }
+
+    enum BubbleControlState {
+        case Snap       // snapped edge
+        case Drag       // dragging around
+        case Pop        // long pressed and popping
+        case NavBar     // popped and went to nav bar
+    }
+
+    var bubbleState: BubbleControlState = .Snap
+    
+    var snapOffset: CGFloat = 10
+    
+    
+    var badgeLabel: UILabel?
+    var badgeCount: Int = 0 {
+        didSet {
+            if badgeCount < 0 {
+                badgeCount = 0
+            } else if badgeCount > 0 {
+                badgeLabel?.hidden = false
+                badgeLabel?.text = "\(badgeCount)"
+            } else {
+                badgeLabel?.hidden = true
+            }
+        }
+    }
+    
+    
+    // MARK: Init
+    
+    init (size: CGSize) {
+        super.init(frame: CGRect (origin: CGPointZero, size: size))
+        defaultInit()
+    }
+    
+    init (image: UIImage) {
+        let size = image.size
+        super.init(frame: CGRect (origin: CGPointZero, size: size))
+        self.image = image
+        defaultInit()
+    }
+
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    
+    
+    func defaultInit () {
+        imageView = UIImageView (frame: CGRectInset(frame, 20, 20))
+        addSubview(imageView!)
+        
+        badgeLabel = UILabel (frame: CGRectInset(frame, 25, 25))
+        badgeLabel?.center = CGPointMake(left + badgeLabel!.w/2, top + badgeLabel!.h/2)
+        badgeLabel?.backgroundColor = UIColor.redColor()
+        badgeLabel?.textAlignment = NSTextAlignment.Center
+        badgeLabel?.textColor = UIColor.whiteColor()
+        badgeLabel?.text = "\(badgeCount)"
+        badgeLabel?.layer.cornerRadius = badgeLabel!.w/2
+        badgeLabel?.layer.masksToBounds = true
+        addSubview(badgeLabel!)
+        layer.cornerRadius = w/2
+        
+        badgeCount = 2
+
+        addTarget(self, action: "touchDown", forControlEvents: UIControlEvents.TouchDown)
+        addTarget(self, action: "touchUp", forControlEvents: UIControlEvents.TouchUpInside)
+        addTarget(self, action: "touchDrag:event:", forControlEvents: UIControlEvents.TouchDragInside)
+        
+        var longPress = UILongPressGestureRecognizer (target: self, action: "longPressHandler:")
+        longPress.minimumPressDuration = 0.75
+        addGestureRecognizer(longPress)
+        
+        center.x = APPDELEGATE.window!!.w - w/2 + snapOffset
+        center.y = 84 + h/2
+    }
+    
+    
+    
+    // MARK: Snap To Edge
+    
+    func snap () {
+        let window = APPDELEGATE.window!!
+
+        var targetX = window.leftWithOffset(snapOffset)
+        var badgeTargetX = w - badgeLabel!.w
+        
+        if center.x > window.w/2 {
+            targetX = window.rightWithOffset(snapOffset) - w
+            badgeTargetX = 0
+        }
+        
+        
+        badgeLabel!.moveX(badgeTargetX)
+        moveX(targetX)
+        bubbleState = .Snap
+    }
+    
+    func lockInWindowBounds () {
+        let window = APPDELEGATE.window!!
+        
+        if top < 64 {
+            var rect = frame
+            rect.origin.y = 64
+            frame = rect
+        }
+        
+        if left < 0 {
+            var rect = frame
+            rect.origin.x = 0
+            frame = rect
+        }
+        
+        
+        if bottom > window.h {
+            var rect = frame
+            rect.origin.y = window.botttomWithOffset(-h)
+            frame = rect
+        }
+        
+        if right > window.w {
+            var rect = frame
+            rect.origin.x = window.rightWithOffset(-w)
+            frame = rect
+        }
+    }
+    
+    
+    
+    // MARK: Events
+    
+    func touchDown () {
+        bounce()
+    }
+    
+    func touchUp () {
+        if bubbleState == .Snap {
+            toggle = !toggle
+        } else {
+            snap()
+        }
+    }
+    
+    func touchDrag (sender: BubbleControl, event: UIEvent) {
+        bubbleState = .Drag
+        
+        let touch = event.allTouches()?.anyObject() as UITouch
+        let location = touch.locationInView(APPDELEGATE.window!)
+        
+        center = location
+        lockInWindowBounds()
+    }
+    
+    
+    
+    // MARK: Gestures
+    
+    func longPressHandler (press: UILongPressGestureRecognizer) {
+        switch press.state {
+        case .Began:
+            pop()
+            
+        case .Ended:
+            if bubbleState == .Pop {
+                cancelPop()
+            }
+            
+        default:
+            return
+        }
+    }
+    
+    func panHandler (pan: UIPanGestureRecognizer) {
+        switch pan.state {
+        case .Began:
+            return
+            
+        case .Ended:
+            snap()
+            //bounce()
+            
+        case .Changed:
+            let location = pan.locationInView(APPDELEGATE.window!)
+            center = location
+            
+            lockInWindowBounds()
+        default:
+            return
+        }
+    }
+    
+    
+    
+    // MARK: Animations
+    
+    func bounce () {
+        self.bubble()
+    }
+    
+    
+    func pop () {
+        bubbleState = .Pop
+        
+        let shake = CABasicAnimation(keyPath: "transform.rotation")
+        shake.fromValue = degreesToRadians(popAnimationShakeRotations.0)
+        shake.toValue = degreesToRadians(popAnimationShakeRotations.1)
+        shake.duration = popAnimationShakeDuration
+        shake.repeatCount = Float.infinity
+        shake.autoreverses = true
+        
+        let grow = CABasicAnimation (keyPath: "transform.scale")
+        grow.fromValue = 1
+        grow.toValue = popAnimationScale
+        grow.duration = popAnimationDuration
+        
+        let anims = CAAnimationGroup ()
+        anims.animations = [shake, grow]
+        anims.duration = popAnimationDuration
+        anims.delegate = self
+        anims.removedOnCompletion = false
+        
+        layer.addAnimation(anims, forKey: "pop")
+    }
+    
+    func cancelPop () {
+        snap()
+        layer.removeAnimationForKey("pop")
+    }
+    
+    
+    
+    func popToNavBar () {
+        bubbleState = .NavBar
+        backgroundColor = UIColor.redColor()
+    }
+    
+    func popFromNavBar () {
+        
+    }
+    
+    
+    func openView () {
+        backgroundColor = UIColor.grayColor()
+    }
+    
+    func closeView () {
+        backgroundColor = UIColor.clearColor()
+    }
+    
+    func degreesToRadians (angle: CGFloat) -> CGFloat {
+        return (CGFloat (M_PI) * angle) / 180.0
+    }
+    
+    
+    override func animationDidStop(anim: CAAnimation!, finished flag: Bool) {
+        if anim == layer.animationForKey("pop") {
+            layer.removeAnimationForKey("pop")
+            popToNavBar()
+        }
+    }
+}

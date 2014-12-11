@@ -10,9 +10,12 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    var bubble: BubbleControl?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        setupBubble()
     }
 
     override func didReceiveMemoryWarning() {
@@ -20,6 +23,22 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
-
+    func setupBubble () {
+        bubble = BubbleControl (size: CGSizeMake(80, 80))
+        bubble?.image = UIImage (named: "basket.png")
+        
+        bubble?.layer.borderWidth = 2
+        bubble?.layer.borderColor = UIColor.blackColor().CGColor
+        
+        view.addSubview(bubble!)
+    }
+    
+    @IBAction func addPressed(sender: AnyObject) {
+        bubble?.badgeCount++
+    }
+    
+    @IBAction func removePressed(sender: AnyObject) {
+        bubble?.badgeCount--
+    }
 }
 
