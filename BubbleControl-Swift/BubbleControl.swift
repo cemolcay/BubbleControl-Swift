@@ -8,7 +8,8 @@
 
 import UIKit
 
-let APPDELEGATE: UIApplicationDelegate = (UIApplication.sharedApplication().delegate as AppDelegate)
+let APPDELEGATE: UIApplicationDelegate
+    = (UIApplication.sharedApplication().delegate as AppDelegate)
 
 private let BubbleControlMoveAnimationDuration: NSTimeInterval = 0.5
 private let BubbleControlSpringDamping: CGFloat = 0.3
@@ -245,6 +246,9 @@ class BubbleControl: UIControl {
         }
     }
     
+    private var _content: UIView?
+    var contentView: (() -> UIView)?
+    
     
     
     // MARK: Properties
@@ -252,9 +256,9 @@ class BubbleControl: UIControl {
     var toggle: Bool = false {
         didSet {
             if toggle {
-                openView()
+                openContentView()
             } else {
-                closeView()
+                closeContentView()
             }
         }
     }
@@ -388,6 +392,11 @@ class BubbleControl: UIControl {
     }
     
     func touchDrag (sender: BubbleControl, event: UIEvent) {
+        
+        if toggle {
+            closeContentView()
+        }
+        
         bubbleState = .Drag
         
         let touch = event.allTouches()?.anyObject() as UITouch
@@ -426,7 +435,8 @@ class BubbleControl: UIControl {
         self.bubble()
     }
     
-    override func animationDidStop(anim: CAAnimation!, finished flag: Bool) {
+    override func animationDidStop(anim: CAAnimation!,
+        finished flag: Bool) {
         if flag {
             if anim == layer.animationForKey("pop") {
                 layer.removeAnimationForKey("pop")
@@ -483,11 +493,13 @@ class BubbleControl: UIControl {
         if let img = image {
             let navButton = UIButton (frame: CGRect (x: 0, y: 0, width: 20, height: 20))
             navButton.setBackgroundImage(image!, forState: .Normal)
-            navButton.addTarget(self, action: "navButtonPressed:", forControlEvents: .TouchUpInside)
+            navButton.addTarget(self, action: "navButtonPressed:",
+                forControlEvents: .TouchUpInside)
             
             barButton = UIBarButtonItem (customView: navButton)
         } else {
-            barButton = UIBarButtonItem (barButtonSystemItem: UIBarButtonSystemItem.Action, target: self, action: "navButtonPressed:")
+            barButton = UIBarButtonItem (barButtonSystemItem: UIBarButtonSystemItem.Action
+                , target: self, action: "navButtonPressed:")
         }
         
         if let last = APPDELEGATE.window!!.rootViewController? as? UINavigationController {
@@ -508,15 +520,23 @@ class BubbleControl: UIControl {
     
     // MARK: Toggle
     
-    func openView () {
-        backgroundColor = UIColor.grayColor()
-        
+    func openContentView () {
         let last = APPDELEGATE.window!!.rootViewController as UINavigationController
         let vc = last.viewControllers.last as UIViewController
+        
+        if let v = contentView {
+            _content = v()
+            vc.view.addSubview(_content!)
+            
+            _content?.bottom = vc.view.bottom
+            moveY(_content!.top - h - snapOffset)
+        }
     }
     
-    func closeView () {
-        backgroundColor = UIColor.clearColor()
+    func closeContentView () {
+        if let v = _content {
+            v.removeFromSuperview()
+        }
     }
     
     

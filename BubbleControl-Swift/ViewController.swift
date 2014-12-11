@@ -31,6 +31,17 @@ class ViewController: UIViewController {
             self.bubble!.popFromNavBar()
         }
         
+        bubble?.contentView = {
+            let v = UIView (frame: CGRect (x: 0, y: 0, width: self.view.w, height: 400))
+            v.backgroundColor = UIColor.grayColor()
+            
+            let label = UILabel (frame: CGRect (x: 10, y: 10, width: v.w, height: 20))
+            label.text = "test text"
+            v.addSubview(label)
+            
+            return v
+        }
+        
         view.addSubview(bubble!)
     }
     
