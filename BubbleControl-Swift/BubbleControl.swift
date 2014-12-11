@@ -246,6 +246,8 @@ class BubbleControl: UIControl {
     
     var borderView: UIView?
     
+    var navButtonAction: (() -> ())?
+    
     // MARK: Init
     
     init (size: CGSize) {
@@ -381,6 +383,11 @@ class BubbleControl: UIControl {
     }
     
     
+    func navButtonPressed (sender: AnyObject) {
+        navButtonAction? ()
+    }
+    
+    
     
     // MARK: Gestures
     
@@ -441,11 +448,24 @@ class BubbleControl: UIControl {
     
     func popToNavBar () {
         bubbleState = .NavBar
-        backgroundColor = UIColor.redColor()
+        
+        self.hidden = true
+        let navButton = UIButton (frame: CGRect (x: 0, y: 0, width: 20, height: 20))
+        navButton.setBackgroundImage(image!, forState: .Normal)
+        navButton.addTarget(self, action: "navButtonPressed:", forControlEvents: .TouchUpInside)
+        
+        if let last = APPDELEGATE.window!!.rootViewController? as? UINavigationController {
+            let vc = last.viewControllers[0] as UIViewController
+            vc.navigationItem.setRightBarButtonItem(UIBarButtonItem (customView: navButton), animated: true)
+        }
     }
     
     func popFromNavBar () {
-        
+        if let last = APPDELEGATE.window!!.rootViewController? as? UINavigationController {
+            let vc = last.viewControllers[0] as UIViewController
+            vc.navigationItem.rightBarButtonItem = nil
+            self.hidden = false
+        }
     }
     
     

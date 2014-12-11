@@ -26,6 +26,10 @@ class ViewController: UIViewController {
     func setupBubble () {
         bubble = BubbleControl (size: CGSizeMake(80, 80))
         bubble?.image = UIImage (named: "basket.png")
+        bubble?.navButtonAction = {
+            println("pressed in nav bar")
+            self.bubble!.popFromNavBar()
+        }
         
         view.addSubview(bubble!)
     }
