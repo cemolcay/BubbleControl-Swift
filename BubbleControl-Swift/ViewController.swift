@@ -27,9 +27,6 @@ class ViewController: UIViewController {
         bubble = BubbleControl (size: CGSizeMake(80, 80))
         bubble?.image = UIImage (named: "basket.png")
         
-        bubble?.layer.borderWidth = 2
-        bubble?.layer.borderColor = UIColor.blackColor().CGColor
-        
         view.addSubview(bubble!)
     }
     

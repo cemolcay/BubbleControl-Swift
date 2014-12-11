@@ -8,9 +8,12 @@
 
 import UIKit
 
+let APPDELEGATE: UIApplicationDelegate = (UIApplication.sharedApplication().delegate as AppDelegate)
+
 private let BubbleControlMoveAnimationDuration: NSTimeInterval = 0.5
 private let BubbleControlSpringDamping: CGFloat = 0.3
 private let BubbleControlSpringVelocity: CGFloat = 0.3
+
 
 extension UIView {
     
@@ -181,7 +184,6 @@ extension UIView {
 }
 
 
-
 class BubbleControl: UIControl {
     
 
@@ -242,6 +244,8 @@ class BubbleControl: UIControl {
     }
     
     
+    var borderView: UIView?
+    
     // MARK: Init
     
     init (size: CGSize) {
@@ -262,8 +266,18 @@ class BubbleControl: UIControl {
     
     
     func defaultInit () {
+        layer.cornerRadius = w/2
+        
         imageView = UIImageView (frame: CGRectInset(frame, 20, 20))
         addSubview(imageView!)
+        
+        borderView = UIView (frame: frame)
+        borderView?.layer.borderColor = UIColor.blackColor().CGColor
+        borderView?.layer.borderWidth = 2
+        borderView?.layer.cornerRadius = w/2
+        borderView?.layer.masksToBounds = true
+        borderView?.userInteractionEnabled = false
+        addSubview(borderView!)
         
         badgeLabel = UILabel (frame: CGRectInset(frame, 25, 25))
         badgeLabel?.center = CGPointMake(left + badgeLabel!.w/2, top + badgeLabel!.h/2)
@@ -274,10 +288,10 @@ class BubbleControl: UIControl {
         badgeLabel?.layer.cornerRadius = badgeLabel!.w/2
         badgeLabel?.layer.masksToBounds = true
         addSubview(badgeLabel!)
-        layer.cornerRadius = w/2
+        
         
         badgeCount = 2
-
+        
         addTarget(self, action: "touchDown", forControlEvents: UIControlEvents.TouchDown)
         addTarget(self, action: "touchUp", forControlEvents: UIControlEvents.TouchUpInside)
         addTarget(self, action: "touchDrag:event:", forControlEvents: UIControlEvents.TouchDragInside)
@@ -385,25 +399,6 @@ class BubbleControl: UIControl {
         }
     }
     
-    func panHandler (pan: UIPanGestureRecognizer) {
-        switch pan.state {
-        case .Began:
-            return
-            
-        case .Ended:
-            snap()
-            //bounce()
-            
-        case .Changed:
-            let location = pan.locationInView(APPDELEGATE.window!)
-            center = location
-            
-            lockInWindowBounds()
-        default:
-            return
-        }
-    }
-    
     
     
     // MARK: Animations
@@ -468,9 +463,11 @@ class BubbleControl: UIControl {
     
     
     override func animationDidStop(anim: CAAnimation!, finished flag: Bool) {
-        if anim == layer.animationForKey("pop") {
-            layer.removeAnimationForKey("pop")
-            popToNavBar()
+        if flag {
+            if anim == layer.animationForKey("pop") {
+                layer.removeAnimationForKey("pop")
+                popToNavBar()
+            }
         }
     }
 }
