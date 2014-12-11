@@ -49,7 +49,11 @@ extension UIView {
     }
     
     var bottom: CGFloat {
-        return self.y + self.h
+        get {
+            return self.y + self.h
+        } set (newValue) {
+            setY(newValue - h)
+        }
     }
     
     
@@ -187,6 +191,19 @@ extension UIView {
 class BubbleControl: UIControl {
     
 
+    // MARK: State
+
+    enum BubbleControlState {
+        case Snap       // snapped edge
+        case Drag       // dragging around
+        case Pop        // long pressed and popping
+        case NavBar     // popped and went to nav bar
+    }
+    
+    var bubbleState: BubbleControlState = .Snap
+    
+    
+
     // MARK: Constants
     
     let popTriggerDuration: NSTimeInterval = 0.5
@@ -197,7 +214,12 @@ class BubbleControl: UIControl {
     
     
     
-    // MARK: Properties
+    // MARK: Layout
+    
+    var snapOffset: CGFloat = 10
+    
+    var borderView: UIView?
+
     
     private var imageView: UIImageView?
     
@@ -207,29 +229,9 @@ class BubbleControl: UIControl {
         }
     }
     
-    var toggle: Bool = false {
-        didSet {
-            if toggle {
-                openView()
-            } else {
-                closeView()
-            }
-        }
-    }
-
-    enum BubbleControlState {
-        case Snap       // snapped edge
-        case Drag       // dragging around
-        case Pop        // long pressed and popping
-        case NavBar     // popped and went to nav bar
-    }
-
-    var bubbleState: BubbleControlState = .Snap
     
-    var snapOffset: CGFloat = 10
+    private var badgeLabel: UILabel?
     
-    
-    var badgeLabel: UILabel?
     var badgeCount: Int = 0 {
         didSet {
             if badgeCount < 0 {
@@ -244,9 +246,22 @@ class BubbleControl: UIControl {
     }
     
     
-    var borderView: UIView?
+    
+    // MARK: Properties
+    
+    var toggle: Bool = false {
+        didSet {
+            if toggle {
+                openView()
+            } else {
+                closeView()
+            }
+        }
+    }
     
     var navButtonAction: (() -> ())?
+    
+    
     
     // MARK: Init
     
@@ -387,10 +402,7 @@ class BubbleControl: UIControl {
         navButtonAction? ()
     }
     
-    
-    
-    // MARK: Gestures
-    
+
     func longPressHandler (press: UILongPressGestureRecognizer) {
         switch press.state {
         case .Began:
@@ -414,6 +426,22 @@ class BubbleControl: UIControl {
         self.bubble()
     }
     
+    override func animationDidStop(anim: CAAnimation!, finished flag: Bool) {
+        if flag {
+            if anim == layer.animationForKey("pop") {
+                layer.removeAnimationForKey("pop")
+                popToNavBar()
+            }
+        }
+    }
+    
+    func degreesToRadians (angle: CGFloat) -> CGFloat {
+        return (CGFloat (M_PI) * angle) / 180.0
+    }
+    
+    
+    
+    // MARK: Pop
     
     func pop () {
         bubbleState = .Pop
@@ -445,18 +473,26 @@ class BubbleControl: UIControl {
     }
     
     
-    
     func popToNavBar () {
         bubbleState = .NavBar
         
         self.hidden = true
-        let navButton = UIButton (frame: CGRect (x: 0, y: 0, width: 20, height: 20))
-        navButton.setBackgroundImage(image!, forState: .Normal)
-        navButton.addTarget(self, action: "navButtonPressed:", forControlEvents: .TouchUpInside)
+        
+        var barButton: UIBarButtonItem?
+        
+        if let img = image {
+            let navButton = UIButton (frame: CGRect (x: 0, y: 0, width: 20, height: 20))
+            navButton.setBackgroundImage(image!, forState: .Normal)
+            navButton.addTarget(self, action: "navButtonPressed:", forControlEvents: .TouchUpInside)
+            
+            barButton = UIBarButtonItem (customView: navButton)
+        } else {
+            barButton = UIBarButtonItem (barButtonSystemItem: UIBarButtonSystemItem.Action, target: self, action: "navButtonPressed:")
+        }
         
         if let last = APPDELEGATE.window!!.rootViewController? as? UINavigationController {
             let vc = last.viewControllers[0] as UIViewController
-            vc.navigationItem.setRightBarButtonItem(UIBarButtonItem (customView: navButton), animated: true)
+            vc.navigationItem.setRightBarButtonItem(barButton, animated: true)
         }
     }
     
@@ -469,25 +505,19 @@ class BubbleControl: UIControl {
     }
     
     
+    
+    // MARK: Toggle
+    
     func openView () {
         backgroundColor = UIColor.grayColor()
+        
+        let last = APPDELEGATE.window!!.rootViewController as UINavigationController
+        let vc = last.viewControllers.last as UIViewController
     }
     
     func closeView () {
         backgroundColor = UIColor.clearColor()
     }
     
-    func degreesToRadians (angle: CGFloat) -> CGFloat {
-        return (CGFloat (M_PI) * angle) / 180.0
-    }
     
-    
-    override func animationDidStop(anim: CAAnimation!, finished flag: Bool) {
-        if flag {
-            if anim == layer.animationForKey("pop") {
-                layer.removeAnimationForKey("pop")
-                popToNavBar()
-            }
-        }
-    }
 }
