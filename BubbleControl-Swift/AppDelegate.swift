@@ -13,13 +13,33 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
+    var bubble: BubbleControl!
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
         
-        
-        
+        bubble = BubbleControl (size: CGSizeMake(80, 80))
+        bubble.image = UIImage (named: "basket.png")
+        bubble.navButtonAction = {
+            println("pressed in nav bar")
+            self.bubble!.popFromNavBar()
+        }
+        bubble.contentView = {
+            
+            let min: CGFloat = 50
+            let max: CGFloat = self.window!.h - 250
+            let randH = min + CGFloat(random()%Int(max-min))
+            
+            let v = UIView (frame: CGRect (x: 0, y: 0, width: self.window!.w, height: max))
+            v.backgroundColor = UIColor.grayColor()
+            
+            let label = UILabel (frame: CGRect (x: 10, y: 10, width: v.w, height: 20))
+            label.text = "test text"
+            v.addSubview(label)
+            
+            return v
+        }
+
         return true
     }
 
@@ -44,7 +64,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
-
-
 }
 

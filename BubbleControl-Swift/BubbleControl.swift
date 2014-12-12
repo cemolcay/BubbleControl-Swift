@@ -8,8 +8,7 @@
 
 import UIKit
 
-let APPDELEGATE: UIApplicationDelegate
-    = (UIApplication.sharedApplication().delegate as AppDelegate)
+let APPDELEGATE: AppDelegate = UIApplication.sharedApplication().delegate as AppDelegate
 
 private let BubbleControlMoveAnimationDuration: NSTimeInterval = 0.5
 private let BubbleControlSpringDamping: CGFloat = 0.6
@@ -201,7 +200,7 @@ class BubbleControl: UIControl {
     // MARK: State
 
     enum BubbleControlState {
-        case Snap       // snapped edge
+        case Snap       // snapped to edge
         case Drag       // dragging around
         case Pop        // long pressed and popping
         case NavBar     // popped and went to nav bar
@@ -246,6 +245,7 @@ class BubbleControl: UIControl {
             } else if badgeCount > 0 {
                 badgeLabel?.hidden = false
                 badgeLabel?.text = "\(badgeCount)"
+                badgeLabel?.bubble()
             } else {
                 badgeLabel?.hidden = true
             }
@@ -331,7 +331,7 @@ class BubbleControl: UIControl {
         longPress.minimumPressDuration = 0.75
         addGestureRecognizer(longPress)
         
-        center.x = APPDELEGATE.window!!.w - w/2 + snapOffset
+        center.x = APPDELEGATE.window!.w - w/2 + snapOffset
         center.y = 84 + h/2
     }
     
@@ -340,7 +340,7 @@ class BubbleControl: UIControl {
     // MARK: Snap To Edge
     
     func snap () {
-        let window = APPDELEGATE.window!!
+        let window = APPDELEGATE.window!
 
         var targetX = window.leftWithOffset(snapOffset)
         var badgeTargetX = w - badgeLabel!.w
@@ -357,7 +357,7 @@ class BubbleControl: UIControl {
     }
     
     func lockInWindowBounds () {
-        let window = APPDELEGATE.window!!
+        let window = APPDELEGATE.window!
         
         if top < 64 {
             var rect = frame
@@ -499,7 +499,14 @@ class BubbleControl: UIControl {
     func popToNavBar () {
         bubbleState = .NavBar
         
-        alphaTo(0)
+        UIView.animateWithDuration(BubbleControlMoveAnimationDuration, delay: 0, usingSpringWithDamping: BubbleControlSpringDamping, initialSpringVelocity: BubbleControlSpringVelocity, options: UIViewAnimationOptions.CurveEaseInOut, animations: { () -> Void in
+            self.setScale(0)
+            self.alpha = 0.5
+            }, completion: { Void in
+                self.setScale(1)
+                self.hidden = true
+        })
+        
         
         var barButton: UIBarButtonItem?
         
@@ -518,20 +525,24 @@ class BubbleControl: UIControl {
         barButtonItem = barButton
         barButtonItem?.setBadgeValue(badgeCount)
         
-        if let last = APPDELEGATE.window!!.rootViewController? as? UINavigationController {
+        if let last = APPDELEGATE.window!.rootViewController? as? UINavigationController {
             let vc = last.viewControllers[0] as UIViewController
             vc.navigationItem.setRightBarButtonItem(barButtonItem!, animated: true)
         }
     }
     
     func popFromNavBar () {
-        if let last = APPDELEGATE.window!!.rootViewController? as? UINavigationController {
+        if let last = APPDELEGATE.window!.rootViewController? as? UINavigationController {
             let vc = last.viewControllers[0] as UIViewController
             vc.navigationItem.rightBarButtonItem = nil
             
             bubbleState = .Snap
             self.barButtonItem = nil
             self.hidden = false
+            
+            let toPosition = self.frame.origin
+            self.setPosition(CGPointMake(APPDELEGATE.window!.right, APPDELEGATE.window!.top))
+            self.movePoint(toPosition)
             self.alphaTo(1)
         }
     }
@@ -543,8 +554,8 @@ class BubbleControl: UIControl {
     func openContentView () {
         if let v = contentView {
             _content = v()
-            APPDELEGATE.window!!.addSubview(_content!)
-            _content?.bottom = APPDELEGATE.window!!.bottom
+            APPDELEGATE.window!.addSubview(_content!)
+            _content?.bottom = APPDELEGATE.window!.bottom
             
             moveY(_content!.top - h - snapOffset)
         }
@@ -578,6 +589,7 @@ extension UIBarButtonItem {
             if value > 0 {
                 label.hidden = false
                 label.text = "\(value)"
+                label.bubble()
             } else {
                 label.hidden = true
             }
