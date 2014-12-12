@@ -15,11 +15,27 @@ class ViewController: UIViewController {
         
         APPDELEGATE.window?.addSubview(APPDELEGATE.bubble)
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    
+    
+    @IBAction func postionValueChanged(sender: UISwitch) {
+        APPDELEGATE.bubble.movesBottom = sender.on
+    }
+    
+    @IBAction func animateIconValueChanged(sender: UISwitch) {
+        APPDELEGATE.animateIcon = sender.on
+    }
+    
+    @IBAction func snapInsideChanged(sender: UISwitch) {
+        APPDELEGATE.bubble.snapsInside = sender.on
+    }
+    
+    
     
     @IBAction func addPressed(sender: AnyObject) {
         APPDELEGATE.bubble.badgeCount++

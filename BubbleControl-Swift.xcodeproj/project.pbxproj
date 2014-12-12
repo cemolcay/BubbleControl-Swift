@@ -432,6 +432,7 @@
 				B27A54571A39953B00F18798 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B27A54581A39953B00F18798 /* Build configuration list for PBXNativeTarget "BubbleControl-SwiftTests" */ = {
 			isa = XCConfigurationList;
@@ -440,6 +441,7 @@
 				B27A545A1A39953B00F18798 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
