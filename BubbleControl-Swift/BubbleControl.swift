@@ -12,8 +12,8 @@ let APPDELEGATE: UIApplicationDelegate
     = (UIApplication.sharedApplication().delegate as AppDelegate)
 
 private let BubbleControlMoveAnimationDuration: NSTimeInterval = 0.5
-private let BubbleControlSpringDamping: CGFloat = 0.3
-private let BubbleControlSpringVelocity: CGFloat = 0.3
+private let BubbleControlSpringDamping: CGFloat = 0.6
+private let BubbleControlSpringVelocity: CGFloat = 0.6
 
 
 extension UIView {
@@ -172,6 +172,12 @@ extension UIView {
         self.layer.transform = transform
     }
     
+    func alphaTo (to: CGFloat) {
+        UIView.animateWithDuration(BubbleControlMoveAnimationDuration,
+            animations: {
+                self.alpha = to
+            })
+    }
     
     func bubble () {
         
@@ -209,7 +215,7 @@ class BubbleControl: UIControl {
     
     let popTriggerDuration: NSTimeInterval = 0.5
     let popAnimationDuration: NSTimeInterval = 1
-    let popAnimationShakeDuration: NSTimeInterval = 0.15
+    let popAnimationShakeDuration: NSTimeInterval = 0.10
     let popAnimationShakeRotations: (CGFloat, CGFloat) = (-30, 30)
     let popAnimationScale: CGFloat = 1.2
     
@@ -218,7 +224,7 @@ class BubbleControl: UIControl {
     // MARK: Layout
     
     var snapOffset: CGFloat = 10
-    
+    var barButtonItem: UIBarButtonItem?
     var borderView: UIView?
 
     
@@ -242,6 +248,10 @@ class BubbleControl: UIControl {
                 badgeLabel?.text = "\(badgeCount)"
             } else {
                 badgeLabel?.hidden = true
+            }
+            
+            if (bubbleState == .NavBar) {
+                barButtonItem!.setBadgeValue(badgeCount)
             }
         }
     }
@@ -416,6 +426,9 @@ class BubbleControl: UIControl {
         switch press.state {
         case .Began:
             pop()
+            if toggle {
+                toggle = !toggle
+            }
             
         case .Ended:
             if bubbleState == .Pop {
@@ -486,7 +499,7 @@ class BubbleControl: UIControl {
     func popToNavBar () {
         bubbleState = .NavBar
         
-        self.hidden = true
+        alphaTo(0)
         
         var barButton: UIBarButtonItem?
         
@@ -502,9 +515,12 @@ class BubbleControl: UIControl {
                 , target: self, action: "navButtonPressed:")
         }
         
+        barButtonItem = barButton
+        barButtonItem?.setBadgeValue(badgeCount)
+        
         if let last = APPDELEGATE.window!!.rootViewController? as? UINavigationController {
             let vc = last.viewControllers[0] as UIViewController
-            vc.navigationItem.setRightBarButtonItem(barButton, animated: true)
+            vc.navigationItem.setRightBarButtonItem(barButtonItem!, animated: true)
         }
     }
     
@@ -512,7 +528,11 @@ class BubbleControl: UIControl {
         if let last = APPDELEGATE.window!!.rootViewController? as? UINavigationController {
             let vc = last.viewControllers[0] as UIViewController
             vc.navigationItem.rightBarButtonItem = nil
+            
+            bubbleState = .Snap
+            self.barButtonItem = nil
             self.hidden = false
+            self.alphaTo(1)
         }
     }
     
@@ -521,14 +541,11 @@ class BubbleControl: UIControl {
     // MARK: Toggle
     
     func openContentView () {
-        let last = APPDELEGATE.window!!.rootViewController as UINavigationController
-        let vc = last.viewControllers.last as UIViewController
-        
         if let v = contentView {
             _content = v()
-            vc.view.addSubview(_content!)
+            APPDELEGATE.window!!.addSubview(_content!)
+            _content?.bottom = APPDELEGATE.window!!.bottom
             
-            _content?.bottom = vc.view.bottom
             moveY(_content!.top - h - snapOffset)
         }
     }
@@ -539,5 +556,50 @@ class BubbleControl: UIControl {
         }
     }
     
-    
 }
+
+
+
+// MARK: - UIBarButtonItem Badge Extension
+
+private var barButtonAssociatedObjectBadge: UInt8 = 0
+extension UIBarButtonItem {
+
+    private var badgeLabel: UILabel? {
+        get {
+            return objc_getAssociatedObject(self, &barButtonAssociatedObjectBadge) as UILabel?
+        } set (value) {
+            objc_setAssociatedObject(self, &barButtonAssociatedObjectBadge, value, UInt(OBJC_ASSOCIATION_RETAIN))
+        }
+    }
+    
+    func setBadgeValue (value: Int) {
+        if let label = badgeLabel {
+            if value > 0 {
+                label.hidden = false
+                label.text = "\(value)"
+            } else {
+                label.hidden = true
+            }
+        } else {
+            if value > 0 {
+                let view = valueForKey("view") as? UIView
+                
+                badgeLabel = UILabel (frame: CGRect (x: 0, y: 0, width: 20, height: 20))
+                badgeLabel?.center = CGPoint (x: view!.right, y: view!.top)
+                badgeLabel?.backgroundColor = UIColor.redColor()
+                
+                badgeLabel?.layer.cornerRadius = badgeLabel!.h/2
+                badgeLabel?.layer.masksToBounds = true
+                
+                badgeLabel?.textAlignment = NSTextAlignment.Center
+                badgeLabel?.textColor = UIColor.whiteColor()
+                badgeLabel?.font = UIFont.systemFontOfSize(15)
+                badgeLabel?.text = "\(value)"
+                
+                view?.addSubview(badgeLabel!)
+            }
+        }
+    }
+}
+

@@ -36,6 +36,15 @@
                                     <action selector="addPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="VSG-8R-qgQ"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SAS-wx-NoM">
+                                <rect key="frame" x="549" y="72" width="35" height="30"/>
+                                <state key="normal" title="Push">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <segue destination="hoL-hY-KDd" kind="show" id="IX1-du-Xpf"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
@@ -43,6 +52,8 @@
                             <constraint firstItem="Kzp-tb-9EZ" firstAttribute="top" secondItem="w3b-4c-GjX" secondAttribute="bottom" constant="8" id="Mfa-6A-WDU"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Kzp-tb-9EZ" secondAttribute="bottom" constant="8" id="Vx5-8Z-2b8"/>
                             <constraint firstItem="w3b-4c-GjX" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="cNW-xI-Os8"/>
+                            <constraint firstItem="SAS-wx-NoM" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="hCE-WP-raT"/>
+                            <constraint firstItem="SAS-wx-NoM" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="8" id="z7i-mk-hgr"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Bubble Control" id="bXe-NX-c6r"/>
@@ -50,6 +61,24 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="734" y="779"/>
+        </scene>
+        <!--Pushed View-->
+        <scene sceneID="KpZ-cd-ynC">
+            <objects>
+                <viewController title="Pushed View" id="hoL-hY-KDd" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="rWi-Wy-hfn"/>
+                        <viewControllerLayoutGuide type="bottom" id="7sH-nx-OTk"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="gZz-gw-Fia">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="baI-EV-uBd" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1393" y="776"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="oNM-0R-T64">

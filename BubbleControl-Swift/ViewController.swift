@@ -32,7 +32,7 @@ class ViewController: UIViewController {
         }
         
         bubble?.contentView = {
-            let v = UIView (frame: CGRect (x: 0, y: 0, width: self.view.w, height: 400))
+            let v = UIView (frame: CGRect (x: 0, y: 0, width: self.view.w, height: 200))
             v.backgroundColor = UIColor.grayColor()
             
             let label = UILabel (frame: CGRect (x: 10, y: 10, width: v.w, height: 20))
@@ -42,7 +42,7 @@ class ViewController: UIViewController {
             return v
         }
         
-        view.addSubview(bubble!)
+        APPDELEGATE.window!!.addSubview(bubble!)
     }
     
     @IBAction func addPressed(sender: AnyObject) {
