@@ -512,18 +512,17 @@ class BubbleControl: UIControl {
 
     func longPressHandler (press: UILongPressGestureRecognizer) {
     
+        if toggle {
+            return
+        }
+        
         switch press.state {
         case .Began:
             pop()
-            if toggle {
-                toggle = !toggle
-            }
-            
         case .Ended:
             if bubbleState == .Pop {
                 cancelPop()
             }
-            
         default:
             return
         }
