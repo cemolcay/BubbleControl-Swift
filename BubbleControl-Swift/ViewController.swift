@@ -32,22 +32,21 @@ class ViewController: UIViewController {
             self.bubble!.popFromNavBar()
         }
         
-        
         bubble.setOpenAnimation = { content, background in
             self.bubble.contentView!.bottom = win.bottom
             if (self.bubble.center.x > win.center.x) {
                 self.bubble.contentView!.left = win.right
                 self.bubble.contentView!.spring({ () -> Void in
                     self.bubble.contentView!.right = win.right
-                    }, completion: nil)
+                }, completion: nil)
             } else {
                 self.bubble.contentView!.right = win.left
                 self.bubble.contentView!.spring({ () -> Void in
                     self.bubble.contentView!.left = win.left
-                    }, completion: nil)
+                }, completion: nil)
             }
         }
-
+        
         
         let min: CGFloat = 50
         let max: CGFloat = win.h - 250

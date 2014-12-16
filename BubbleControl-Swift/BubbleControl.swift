@@ -648,20 +648,25 @@ class BubbleControl: UIControl {
     
     func openContentView () {
         if let v = contentView {
-            APPDELEGATE.window!.addSubview(v)
+            let win = APPDELEGATE.window!
+            win.addSubview(v)
+            win.bringSubviewToFront(self)
             
             snapOffset = snapOffsetMin
             snap()
             positionBeforeToggle = frame.origin
             
             if let anim = setOpenAnimation {
-                anim (contentView: v, backgroundView: APPDELEGATE.window?.subviews[0] as? UIView)
+                anim (contentView: v, backgroundView: win.subviews[0] as? UIView)
             } else {
-                v.bottom = APPDELEGATE.window!.bottom
+                v.bottom = win.bottom
             }
             
-            moveY(v.top - h - snapOffset)
-            APPDELEGATE.window?.bringSubviewToFront(self)
+            if movesBottom {
+                movePoint(CGPoint (x: win.center.x - w/2, y: win.bottom - h - snapOffset))
+            } else {
+                moveY(v.top - h - snapOffset)
+            }
         }
     }
     
