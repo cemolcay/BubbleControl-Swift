@@ -8,7 +8,7 @@
 
 import UIKit
 
-let APPDELEGATE: AppDelegate = UIApplication.sharedApplication().delegate as AppDelegate
+let APPDELEGATE: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
 
 
 
@@ -145,7 +145,7 @@ extension UIView {
         
         spring({ () -> Void in
             self.frame = moveRect
-        }, completion: nil)
+            }, completion: nil)
     }
     
     func moveX (x: CGFloat) {
@@ -154,7 +154,7 @@ extension UIView {
         
         spring({ () -> Void in
             self.frame = moveRect
-        }, completion: nil)
+            }, completion: nil)
     }
     
     func movePoint (x: CGFloat, y: CGFloat) {
@@ -164,7 +164,7 @@ extension UIView {
         
         spring({ () -> Void in
             self.frame = moveRect
-        }, completion: nil)
+            }, completion: nil)
     }
     
     func movePoint (point: CGPoint) {
@@ -173,7 +173,7 @@ extension UIView {
         
         spring({ () -> Void in
             self.frame = moveRect
-        }, completion: nil)
+            }, completion: nil)
     }
     
     
@@ -189,7 +189,7 @@ extension UIView {
         UIView.animateWithDuration(BubbleControlMoveAnimationDuration,
             animations: {
                 self.alpha = to
-            })
+        })
     }
     
     func bubble () {
@@ -197,7 +197,7 @@ extension UIView {
         self.setScale(1.2)
         spring({ () -> Void in
             self.setScale(1)
-        }, completion: nil)
+            }, completion: nil)
     }
 }
 
@@ -242,7 +242,7 @@ class BubbleControl: UIControl {
     
     
     // MARK: Bubble State
-
+    
     enum BubbleControlState {
         case Snap       // snapped to edge
         case Drag       // dragging around
@@ -259,7 +259,7 @@ class BubbleControl: UIControl {
             }
         }
     }
-
+    
     
     
     // MARK: Snap
@@ -341,7 +341,7 @@ class BubbleControl: UIControl {
         
         defaultInit()
     }
-
+    
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
@@ -405,7 +405,7 @@ class BubbleControl: UIControl {
     
     func snap () {
         let window = APPDELEGATE.window!
-
+        
         // if control on left side
         var targetX = window.leftWithOffset(snapOffset)
         var badgeTargetX = w - badgeLabel!.w
@@ -421,7 +421,7 @@ class BubbleControl: UIControl {
         moveX(targetX)
         badgeLabel!.moveX(badgeTargetX)
     }
-
+    
     func snapInside () {
         println("snap inside !")
         if !toggle && bubbleState == .Snap {
@@ -432,7 +432,7 @@ class BubbleControl: UIControl {
     
     func setupSnapInsideTimer () {
         if !snapsInside {
-         return
+            return
         }
         
         if let timer = snapInTimer {
@@ -502,16 +502,16 @@ class BubbleControl: UIControl {
             toggle = false
         }
         
-        let touch = event.allTouches()?.anyObject() as UITouch
+        let touch = event.allTouches()!.first! as! UITouch
         let location = touch.locationInView(APPDELEGATE.window!)
         
         center = location
         lockInWindowBounds()
     }
     
-
-    func longPressHandler (press: UILongPressGestureRecognizer) {
     
+    func longPressHandler (press: UILongPressGestureRecognizer) {
+        
         if toggle {
             return
         }
@@ -533,22 +533,22 @@ class BubbleControl: UIControl {
     }
     
     
-
+    
     // MARK: Animations
     
     override func animationDidStop(anim: CAAnimation!,
         finished flag: Bool) {
-        if flag {
-            if anim == layer.animationForKey("pop") {
-                layer.removeAnimationForKey("pop")
-                
-                didPop? ()
-                
-                if popsToNavBar {
-                    popToNavBar()
+            if flag {
+                if anim == layer.animationForKey("pop") {
+                    layer.removeAnimationForKey("pop")
+                    
+                    didPop? ()
+                    
+                    if popsToNavBar {
+                        popToNavBar()
+                    }
                 }
             }
-        }
     }
     
     func degreesToRadians (angle: CGFloat) -> CGFloat {
@@ -596,9 +596,9 @@ class BubbleControl: UIControl {
         spring({ () -> Void in
             self.setScale(0)
             self.alpha = 0.5
-        }, completion: { finished in
-            self.setScale(1)
-            self.hidden = true
+            }, completion: { finished in
+                self.setScale(1)
+                self.hidden = true
         })
         
         
@@ -619,15 +619,15 @@ class BubbleControl: UIControl {
         barButtonItem = barButton
         barButtonItem?.setBadgeValue(badgeCount)
         
-        if let last = APPDELEGATE.window!.rootViewController? as? UINavigationController {
-            let vc = last.viewControllers[0] as UIViewController
+        if let last = APPDELEGATE.window!.rootViewController as? UINavigationController {
+            let vc = last.viewControllers[0] as! UIViewController
             vc.navigationItem.setRightBarButtonItem(barButtonItem!, animated: true)
         }
     }
     
     func popFromNavBar () {
-        if let last = APPDELEGATE.window!.rootViewController? as? UINavigationController {
-            let vc = last.viewControllers[0] as UIViewController
+        if let last = APPDELEGATE.window!.rootViewController as? UINavigationController {
+            let vc = last.viewControllers[0] as! UIViewController
             vc.navigationItem.rightBarButtonItem = nil
             
             bubbleState = .Snap
@@ -641,7 +641,7 @@ class BubbleControl: UIControl {
         }
     }
     
-
+    
     
     // MARK: Toggle
     
@@ -692,10 +692,10 @@ class BubbleControl: UIControl {
 
 private var barButtonAssociatedObjectBadge: UInt8 = 0
 extension UIBarButtonItem {
-
+    
     private var badgeLabel: UILabel? {
         get {
-            return objc_getAssociatedObject(self, &barButtonAssociatedObjectBadge) as UILabel?
+            return objc_getAssociatedObject(self, &barButtonAssociatedObjectBadge) as! UILabel?
         } set (value) {
             objc_setAssociatedObject(self, &barButtonAssociatedObjectBadge, value, UInt(OBJC_ASSOCIATION_RETAIN))
         }

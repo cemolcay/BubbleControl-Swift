@@ -96,7 +96,7 @@ class ViewController: UIViewController {
     }
     
     func animateBubbleIcon (on: Bool) {
-        let shapeLayer = self.bubble.imageView!.layer.sublayers![0] as CAShapeLayer
+        let shapeLayer = self.bubble.imageView!.layer.sublayers![0] as! CAShapeLayer
         let from = on ? self.basketBezier().CGPath: self.arrowBezier().CGPath
         let to = on ? self.arrowBezier().CGPath: self.basketBezier().CGPath
         
